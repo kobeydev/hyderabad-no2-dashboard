@@ -383,6 +383,16 @@ function App() {
 
         </section>
 
+        <InsightsSection
+          predictions={predictions}
+          selectedDate={selectedDate}
+          onSelectCell={(cell) => {
+            setSelectedCell({
+              gridId: String(cell.grid_id),
+              prediction: cell,
+             })
+          }}
+        />
         <section className="dashboard-grid">
 
           <div className="map-card">
@@ -1257,5 +1267,224 @@ function parseCSVLine(line) {
 
   return result
 }
+function InsightsSection({
+  predictions,
+  selectedDate,
+  onSelectCell,
+}) {
+  const dateData = useMemo(() => {
+    return predictions
+      .filter(
+        (item) => item.date === selectedDate,
+      )
+      .filter((item) =>
+        Number.isFinite(
+          Number(item.predicted_no2),
+        ),
+      )
+  }, [predictions, selectedDate])
 
+  const insights = useMemo(() => {
+    if (dateData.length === 0) {
+      return {
+        average: null,
+        highest: null,
+        lowest: null,
+        hotspots: [],
+      }
+    }
+
+    const sorted = [...dateData].sort(
+      (a, b) =>
+        Number(b.predicted_no2) -
+        Number(a.predicted_no2),
+    )
+
+    const average =
+      dateData.reduce(
+        (sum, item) =>
+          sum +
+          Number(item.predicted_no2),
+        0,
+      ) / dateData.length
+
+    return {
+      average,
+      highest: sorted[0],
+      lowest: sorted[sorted.length - 1],
+      hotspots: sorted.slice(0, 5),
+    }
+  }, [dateData])
+
+  return (
+    <section className="insights-section">
+
+      <div className="insights-heading">
+
+        <div>
+          <p className="eyebrow">
+            AIR QUALITY INSIGHTS
+          </p>
+
+          <h2>
+            What is happening across Hyderabad?
+          </h2>
+
+          <p>
+            Automatically calculated from the
+            selected day's ML predictions.
+          </p>
+        </div>
+
+        <div className="insights-date">
+          {formatDate(selectedDate)}
+        </div>
+
+      </div>
+
+
+      <div className="insights-cards">
+
+        <InsightCard
+          label="Average predicted NO₂"
+          value={formatNumber(
+            insights.average,
+          )}
+          description="Across all prediction cells"
+        />
+
+        <InsightCard
+          label="Highest predicted NO₂"
+          value={formatNumber(
+            insights.highest?.predicted_no2,
+          )}
+          description={
+            insights.highest
+              ? `Grid ${insights.highest.grid_id}`
+              : 'No data'
+          }
+        />
+
+        <InsightCard
+          label="Lowest predicted NO₂"
+          value={formatNumber(
+            insights.lowest?.predicted_no2,
+          )}
+          description={
+            insights.lowest
+              ? `Grid ${insights.lowest.grid_id}`
+              : 'No data'
+          }
+        />
+
+        <InsightCard
+          label="Prediction coverage"
+          value={dateData.length.toLocaleString()}
+          description="Grid cells with predictions"
+        />
+
+      </div>
+
+
+      <div className="hotspots-card">
+
+        <div className="hotspots-header">
+
+          <div>
+            <p className="eyebrow">
+              HOTSPOT RANKING
+            </p>
+
+            <h3>
+              Highest predicted NO₂ areas
+            </h3>
+          </div>
+
+          <span>
+            Top 5
+          </span>
+
+        </div>
+
+
+        <div className="hotspot-list">
+
+          {insights.hotspots.map(
+            (cell, index) => (
+              <button
+                className="hotspot-row"
+                key={`${cell.grid_id}-${cell.date}`}
+                onClick={() =>
+                  onSelectCell(cell)
+                }
+              >
+
+                <span className="hotspot-rank">
+                  {String(index + 1).padStart(
+                    2,
+                    '0',
+                  )}
+                </span>
+
+                <span className="hotspot-grid">
+                  {cell.grid_id}
+                </span>
+
+                <span className="hotspot-quadrant">
+                  {cell.quadrant || '--'}
+                </span>
+
+                <span className="hotspot-value">
+                  {formatNumber(
+                    cell.predicted_no2,
+                  )}
+                </span>
+
+                <span className="hotspot-arrow">
+                  →
+                </span>
+
+              </button>
+            ),
+          )}
+
+          {insights.hotspots.length === 0 && (
+            <div className="no-hotspots">
+              No prediction data available for
+              this date.
+            </div>
+          )}
+
+        </div>
+
+      </div>
+
+    </section>
+  )
+}
+
+
+function InsightCard({
+  label,
+  value,
+  description,
+}) {
+  return (
+    <div className="insight-card">
+
+      <span className="insight-label">
+        {label}
+      </span>
+
+      <strong className="insight-value">
+        {value}
+      </strong>
+
+      <span className="insight-description">
+        {description}
+      </span>
+
+    </div>
+  )
+}
 export default App
