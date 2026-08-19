@@ -633,6 +633,161 @@ function App() {
                   </button>
 
                 </div>
+                {(() => {
+  const prediction = selectedCell.prediction
+
+  const status = getNO2Status(
+    prediction?.predicted_no2
+  )
+
+  const hasGroundObservation =
+    prediction?.actual_no2 !== null &&
+    prediction?.actual_no2 !== undefined &&
+    Number.isFinite(
+      Number(prediction?.actual_no2)
+    )
+
+  return (
+    <>
+      {/* NO₂ VALUE */}
+
+      <div className="main-value">
+
+        <span>
+          Predicted NO₂
+        </span>
+
+        <strong>
+          {formatEnvironmentalValue(
+            prediction?.predicted_no2,
+            2
+          )}
+        </strong>
+
+        <div
+          className={`no2-status ${status.className}`}
+        >
+          {status.label}
+        </div>
+
+      </div>
+
+
+      {/* ENVIRONMENTAL CONTEXT */}
+
+      <div className="detail-section">
+
+        <div className="detail-section-title">
+          ENVIRONMENTAL CONTEXT
+        </div>
+
+        <div className="detail-list">
+
+          <div className="detail-row">
+            <span>AOD</span>
+
+            <strong>
+              {formatEnvironmentalValue(
+                prediction?.aod,
+                3
+              )}
+            </strong>
+          </div>
+
+
+          <div className="detail-row">
+            <span>NDVI</span>
+
+            <strong>
+              {formatEnvironmentalValue(
+                prediction?.ndvi,
+                3
+              )}
+            </strong>
+          </div>
+
+
+          <div className="detail-row">
+            <span>Population density</span>
+
+            <strong>
+              {formatEnvironmentalValue(
+                prediction?.population_density,
+                2
+              )}
+            </strong>
+          </div>
+
+
+          <div className="detail-row">
+            <span>Cloud cover</span>
+
+            <strong>
+              {formatEnvironmentalValue(
+                prediction?.cloud,
+                3
+              )}
+            </strong>
+          </div>
+
+
+          <div className="detail-row">
+            <span>Quadrant</span>
+
+            <strong>
+              {prediction?.quadrant || '—'}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* GROUND OBSERVATION */}
+
+      <div className="ground-observation">
+
+        <div className="ground-observation-header">
+
+          <div>
+
+            <span className="ground-label">
+              GROUND OBSERVATION
+            </span>
+
+            <strong>
+              {hasGroundObservation
+                ? 'Available'
+                : 'Not available'}
+            </strong>
+
+          </div>
+
+          <span
+            className={
+              hasGroundObservation
+                ? 'ground-indicator available'
+                : 'ground-indicator unavailable'
+            }
+          />
+
+        </div>
+
+        <p>
+          {hasGroundObservation
+            ? `Ground NO₂: ${formatEnvironmentalValue(
+                prediction.actual_no2,
+                2
+              )}`
+            : 'This grid cell does not have a ground NO₂ observation for the selected date.'}
+        </p>
+
+      </div>
+
+    </>
+  )
+})()}
 
                 {selectedCell.prediction ? (
 
@@ -1486,5 +1641,52 @@ function InsightCard({
 
     </div>
   )
+}
+function getNO2Status(value) {
+  const no2 = Number(value)
+
+  if (!Number.isFinite(no2)) {
+    return {
+      label: 'NO DATA',
+      className: 'no-data-status',
+    }
+  }
+
+  if (no2 < 20) {
+    return {
+      label: 'LOW',
+      className: 'low-status',
+    }
+  }
+
+  if (no2 < 40) {
+    return {
+      label: 'MODERATE',
+      className: 'moderate-status',
+    }
+  }
+
+  if (no2 < 60) {
+    return {
+      label: 'HIGH',
+      className: 'high-status',
+    }
+  }
+
+  return {
+    label: 'VERY HIGH',
+    className: 'very-high-status',
+  }
+}
+
+
+function formatEnvironmentalValue(value, digits = 2) {
+  const number = Number(value)
+
+  if (!Number.isFinite(number)) {
+    return '—'
+  }
+
+  return number.toFixed(digits)
 }
 export default App
