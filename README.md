@@ -1,3 +1,18 @@
+# Hyderabad NO₂ Dashboard
+
+> Interactive spatial visualization of NO₂ predictions across Hyderabad.
+
+##  Link
+
+🌐 **[Open the Live Dashboard](https://hyderabad-no2-dashboard.vercel.app/)**
+
+Built with React, Vite, Leaflet and Vercel.
+
+
+
+
+
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
