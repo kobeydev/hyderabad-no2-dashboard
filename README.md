@@ -4,11 +4,13 @@
 
 ##  Link
 
-🌐 **[Open the Live Dashboard](https://hyderabad-no2-dashboard.vercel.app/)**
+**[link](https://hyderabad-no2-dashboard.vercel.app/)**
 
 Built with React, Vite, Leaflet and Vercel.
 
 
+## Link of the repo of our teams' project in SIH internal hackathon.
+**[link](https://github.com/Cypher16k/AQI_Downscaling_SIH)
 
 
 
